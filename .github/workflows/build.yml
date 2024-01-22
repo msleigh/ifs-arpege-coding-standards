@@ -1,0 +1,37 @@
+name: build
+
+on:
+    # Triggers the workflow on push events
+    push:
+        branches: [ 'main' ]
+        tags-ignore: [ '**' ]
+
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs:
+    job_matrix:
+        strategy:
+            matrix:
+                language: [fortran, python]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ammaraskar/sphinx-action@master
+              with:
+                  docs-folder: "${{ matrix.language }}/"
+                  pre-build-command: "pip install -r requirements.txt"
+                  build-command: "make html"
+            - run: |
+                pwd
+                ls -l
+                mkdir -p ~/bin
+                curl -o ~/bin/sites -L \
+                    "https://get.ecmwf.int/service/rest/v1/search/assets/download?sort=name&direction=desc&q=linux&repository=sites-cli"
+                chmod a+x ~/bin/sites
+                ~/bin/sites content \
+                    --debug \
+                    --space docs \
+                    --name ifs-coding-standards \
+                    --api-authentication-token=${{ secrets.AUTH_TOKEN }} \
+                    upload --force --source "${{ matrix.language }}/_build/html/" --destination "${{ matrix.language }}/" --recursive
