@@ -1,2 +1,3 @@
-IFS coding standards
-====================
+# IFS-Arpege coding standards
+
+
