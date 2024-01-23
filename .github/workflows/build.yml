@@ -7,6 +7,9 @@ on:
         branches: [ 'main' ]
         tags-ignore: [ '**' ]
 
+    # Triggers the workflow on pull request events
+    pull_request:
+
     # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
 
@@ -29,6 +32,7 @@ jobs:
                   build-command: "make html"
 
             - name: Deploy to sites
+              if: github.event_name != 'pull_request'
               run: |
                 mkdir -p ~/bin
                 curl -o ~/bin/sites -L \
