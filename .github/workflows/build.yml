@@ -33,6 +33,8 @@ jobs:
 
             - name: Deploy to sites
               if: github.event_name != 'pull_request'
+              env:
+                  SITES_TOKEN: ${{ secrets.SITES_TOKEN_IFS_CODING_STANDARDS }}
               run: |
                 mkdir -p ~/bin
                 curl -o ~/bin/sites -L \
@@ -42,5 +44,9 @@ jobs:
                     --debug \
                     --space docs \
                     --name ifs-coding-standards \
-                    --api-authentication-token=${{ secrets.AUTH_TOKEN }} \
-                    upload --force --source "${{ matrix.language }}/_build/html/" --destination "${{ matrix.language }}/" --recursive
+                    --api-authentication-token=${{ secrets.SITES_TOKEN }} \
+                    upload \
+                        --force \
+                        --source "${{ matrix.language }}/_build/html/" \
+                        --destination "${{ matrix.language }}/" \
+                        --recursive
