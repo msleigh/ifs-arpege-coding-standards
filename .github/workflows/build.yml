@@ -1,5 +1,6 @@
 name: build
 
+# Controls when the workflow will run
 on:
     # Triggers the workflow on push events
     push:
@@ -10,21 +11,25 @@ on:
     workflow_dispatch:
 
 jobs:
-    job_matrix:
-        strategy:
-            matrix:
-                language: [fortran, python]
+    build_language:
+        name: Build and deploy coding standard
         runs-on: ubuntu-latest
+        strategy:
+            fail-fast: true
+            matrix:
+                language: ["fortran", "python"]
         steps:
             - uses: actions/checkout@v4
-            - uses: ammaraskar/sphinx-action@master
+
+            - name: Build Sphinx documentation
+              uses: ammaraskar/sphinx-action@master
               with:
                   docs-folder: "${{ matrix.language }}/"
                   pre-build-command: "pip install -r requirements.txt"
                   build-command: "make html"
-            - run: |
-                pwd
-                ls -l
+
+            - name: Deploy to sites
+              run: |
                 mkdir -p ~/bin
                 curl -o ~/bin/sites -L \
                     "https://get.ecmwf.int/service/rest/v1/search/assets/download?sort=name&direction=desc&q=linux&repository=sites-cli"
